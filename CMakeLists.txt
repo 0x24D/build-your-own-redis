@@ -23,4 +23,4 @@ find_package(Threads REQUIRED)
 
 add_executable(redis-server src/main.cpp)
 target_link_libraries(redis-server "${Boost_SYSTEM_LIBRARY}" "${CMAKE_THREAD_LIBS_INIT}")
-
+add_compile_options("-Wall" "-Wextra" "-Wshadow" "-Wnon-virtual-dtor" "-Wpedantic")
