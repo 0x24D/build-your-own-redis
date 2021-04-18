@@ -137,7 +137,11 @@ int main() {
         RecvBuffer recv {};
         boost::system::error_code ec;
         size_t bytesReceived = socket.read_some(boost::asio::buffer(recv), ec);
-        
+        if (ec == boost::asio::error::eof) {
+            break;
+        } else if (ec) {
+            throw boost::system::system_error(ec);
+        }
         std::vector<std::string> parsedRequests {};
         const DataTypes t {recv[0]};
         switch (t) {
@@ -154,11 +158,9 @@ int main() {
                 break;
             }
         }
-        for (const auto& request: parsedRequests) {
-            std::string requestKey {};
-            std::transform(request.begin(), request.end(), std::back_inserter(requestKey), ::tolower);
-            boost::asio::write(socket, boost::asio::buffer(requestResponses.at(requestKey)), ec);
-        }
+        std::string request {};
+        std::transform(parsedRequests[0].begin(), parsedRequests[0].end(), std::back_inserter(request), ::tolower);
+        boost::asio::write(socket, boost::asio::buffer(requestResponses.at(request)), ec);
     }
     return 0;
 }
