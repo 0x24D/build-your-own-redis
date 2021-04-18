@@ -24,29 +24,52 @@ template<DataTypes T>
 std::optional<std::vector<std::string>> parseRequest(const RecvBuffer& recv, const size_t bytesReceived) {
     return {};
 }
- 
-//TODO: Correctly handle bulk strings.
-/*
-127.0.0.1:6379> ping 12456\r\n
-12456\r\n
-127.0.0.1:6379> ping 124567\r\n
-1
-*/
 
+// TODO: Handle ping response correctly.
+/*
+./bin/redis-server> redis-cli
+127.0.0.1:6379> ping
+PONG
+127.0.0.1:6379> ping ping
+ping
+127.0.0.1:6379> ping "ping ping"
+ping ping
+127.0.0.1:6379> ping "ping\r\nping"
+ping
+127.0.0.1:6379> ping ping\r\nping
+ping\r\nping
+127.0.0.1:6379> 
+redis-server> redis-cli
+127.0.0.1:6379> ping
+PONG
+127.0.0.1:6379> ping ping
+"ping"
+127.0.0.1:6379> ping "ping ping"
+"ping ping"
+127.0.0.1:6379> ping "ping\r\nping"
+"ping\r\nping"
+127.0.0.1:6379> ping ping\r\nping
+"ping\\r\\nping"
+*/
+ 
 template<>
 std::optional<std::vector<std::string>> parseRequest<DataTypes::BulkString>(const RecvBuffer& recv, const size_t bytesReceived) {
-    const auto length = recv[1] - '0';
-    const auto stringStart = std::find(recv.begin(), recv.end(), '\r') + 2;
-    const std::string str {stringStart, stringStart + length};
+    std::string length {};
+    auto it = std::find(recv.begin(), recv.end(), '\r');
+    std::copy(recv.begin() + 1, it, std::back_inserter(length));
+    it += 2;
+    const std::string str {it, it + std::stoi(length)};
     return std::vector {str};
 }
 
 template<>
 std::optional<std::vector<std::string>> parseRequest<DataTypes::Array>(const RecvBuffer& recv, const size_t bytesReceived) {
     std::vector<std::string> ret {};
-    const auto numElements = recv[1] - '0';
-    auto findStart = recv.begin() + 4;
-    for (auto i = 0; i < numElements; ++i) {
+    std::string numElements {};
+    const auto numElementsEnd = std::find(recv.begin(), recv.end(), '\r');
+    std::copy(recv.begin() + 1, numElementsEnd, std::back_inserter(numElements));
+    auto findStart = numElementsEnd + 2;
+    for (auto i = 0; i < std::stoi(numElements); ++i) {
         const DataTypes t {*findStart};
         if (t == DataTypes::BulkString) {
             const auto stringEnd = std::find(
