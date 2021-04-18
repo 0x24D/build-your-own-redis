@@ -25,33 +25,6 @@ std::optional<std::vector<std::string>> parseRequest(const RecvBuffer& recv, con
     return {};
 }
 
-// TODO: Handle ping response correctly.
-/*
-./bin/redis-server> redis-cli
-127.0.0.1:6379> ping
-PONG
-127.0.0.1:6379> ping ping
-ping
-127.0.0.1:6379> ping "ping ping"
-ping ping
-127.0.0.1:6379> ping "ping\r\nping"
-ping
-127.0.0.1:6379> ping ping\r\nping
-ping\r\nping
-127.0.0.1:6379> 
-redis-server> redis-cli
-127.0.0.1:6379> ping
-PONG
-127.0.0.1:6379> ping ping
-"ping"
-127.0.0.1:6379> ping "ping ping"
-"ping ping"
-127.0.0.1:6379> ping "ping\r\nping"
-"ping\r\nping"
-127.0.0.1:6379> ping ping\r\nping
-"ping\\r\\nping"
-*/
- 
 template<>
 std::optional<std::vector<std::string>> parseRequest<DataTypes::BulkString>(const RecvBuffer& recv, const size_t bytesReceived) {
     std::string length {};
@@ -68,19 +41,17 @@ std::optional<std::vector<std::string>> parseRequest<DataTypes::Array>(const Rec
     std::string numElements {};
     const auto numElementsEnd = std::find(recv.begin(), recv.end(), '\r');
     std::copy(recv.begin() + 1, numElementsEnd, std::back_inserter(numElements));
-    auto findStart = numElementsEnd + 2;
+    auto stringStart = numElementsEnd + 2;
     for (auto i = 0; i < std::stoi(numElements); ++i) {
-        const DataTypes t {*findStart};
+        const DataTypes t {*stringStart};
         if (t == DataTypes::BulkString) {
-            const auto stringEnd = std::find(
-                                    std::find(findStart, recv.end(), '\r') + 1, 
-                                        recv.end(), '\r');
             RecvBuffer bulkString {};
-            std::copy(findStart, stringEnd + 1, bulkString.begin());
-            const auto bytesToSend = std::distance(findStart, stringEnd + 1) + 1;
-            findStart = stringEnd + 2;
+            std::copy(stringStart, recv.end(), bulkString.begin());
+            const auto bytesToSend = std::distance(stringStart, recv.end()) + 1;
             const auto request = parseRequest<DataTypes::BulkString>(bulkString, bytesToSend).value();
             std::copy(request.begin(), request.end(), std::back_inserter(ret));
+            const auto returnSize = ret[i].size();
+            stringStart += (1 + std::to_string(returnSize).size() + 2 + returnSize + 2); // DataType, size of string length, \r\n, length of string, \r\n 
         }
     }
     return ret;
@@ -161,12 +132,11 @@ int main() {
         if (parsedRequest.size() == 1) {
             str = "+PONG\r\n";
         } else {
-            if (parsedRequest[1].find("\r\n") == std::string::npos) {
-                str = '+';
-            } else {
-                str = '$' + std::to_string(parsedRequest[1].size()) + "\r\n";
-            }
-            str += parsedRequest[1] + "\r\n";
+            str = '$';
+            str += std::to_string(parsedRequest[1].size());
+            str += "\r\n";
+            str += parsedRequest[1];
+            str += "\r\n";
         }
         return str;
     };
