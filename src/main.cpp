@@ -24,6 +24,14 @@ template<DataTypes T>
 std::optional<std::vector<std::string>> parseRequest(const RecvBuffer& recv, const size_t bytesReceived) {
     return {};
 }
+ 
+//TODO: Correctly handle bulk strings.
+/*
+127.0.0.1:6379> ping 12456\r\n
+12456\r\n
+127.0.0.1:6379> ping 124567\r\n
+1
+*/
 
 template<>
 std::optional<std::vector<std::string>> parseRequest<DataTypes::BulkString>(const RecvBuffer& recv, const size_t bytesReceived) {
@@ -124,9 +132,25 @@ int main() {
     const std::array commandsImplemented {commandCmd, pingCmd};
     const auto commandResponse = makeCommandResponse(commandsImplemented);   
     
-    const std::map<std::string, std::string> requestResponses {
-        {commandCmd.getName(), commandResponse},
-        {pingCmd.getName(), "+PONG\r\n"}
+    const auto commandCmdResponse = [&commandResponse](const std::vector<std::string>& parsedRequest) { return commandResponse; }; // TODO: Handle COMMAND with additional args.
+    const auto pingCmdResponse = [](const std::vector<std::string>& parsedRequest) { 
+        std::string str {};
+        if (parsedRequest.size() == 1) {
+            str = "+PONG\r\n";
+        } else {
+            if (parsedRequest[1].find("\r\n") == std::string::npos) {
+                str = '+';
+            } else {
+                str = '$' + std::to_string(parsedRequest[1].size()) + "\r\n";
+            }
+            str += parsedRequest[1] + "\r\n";
+        }
+        return str;
+    };
+
+    const std::map<std::string, std::function<std::string(const std::vector<std::string>&)>> requestResponses {
+        {commandCmd.getName(), commandCmdResponse},
+        {pingCmd.getName(), pingCmdResponse}
     };
     
     boost::asio::io_context ctx;
@@ -142,25 +166,25 @@ int main() {
         } else if (ec) {
             throw boost::system::system_error(ec);
         }
-        std::vector<std::string> parsedRequests {};
+        std::vector<std::string> parsedRequest {};
         const DataTypes t {recv[0]};
         switch (t) {
             case DataTypes::BulkString:
             { 
                 const auto request = parseRequest<DataTypes::BulkString>(recv, bytesReceived).value();
-                std::copy(request.begin(), request.end(), std::back_inserter(parsedRequests));
+                std::copy(request.begin(), request.end(), std::back_inserter(parsedRequest));
                 break;
             }
             case DataTypes::Array:
             { 
                 const auto request = parseRequest<DataTypes::Array>(recv, bytesReceived).value(); 
-                std::copy(request.begin(), request.end(), std::back_inserter(parsedRequests));
+                std::copy(request.begin(), request.end(), std::back_inserter(parsedRequest));
                 break;
             }
         }
         std::string request {};
-        std::transform(parsedRequests[0].begin(), parsedRequests[0].end(), std::back_inserter(request), ::tolower);
-        boost::asio::write(socket, boost::asio::buffer(requestResponses.at(request)), ec);
+        std::transform(parsedRequest[0].begin(), parsedRequest[0].end(), std::back_inserter(request), ::tolower);
+        boost::asio::write(socket, boost::asio::buffer(requestResponses.at(request)(parsedRequest)), ec);
     }
     return 0;
 }
