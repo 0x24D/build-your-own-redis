@@ -21,6 +21,6 @@ endif(Boost_FOUND)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-add_executable(redis-server src/main.cpp)
+add_executable(redis-server src/main.cpp src/rediscommand.cpp src/redisserver.cpp)
 target_link_libraries(redis-server "${Boost_SYSTEM_LIBRARY}" "${CMAKE_THREAD_LIBS_INIT}")
 add_compile_options("-Wall" "-Wextra" "-Wshadow" "-Wnon-virtual-dtor" "-Wpedantic")
