@@ -5,7 +5,14 @@ class TestHelper {
 public:
     static void assert(const std::string& label, const auto& response, const auto& expectedResponse) {
         if (response != expectedResponse) {
+            const auto printLambda = [](const auto& v) {
+                std::cerr << v << " ";
+            };
             std::cerr << "Test case '" << label << "' failed\n";
+            std::for_each(response.begin(), response.end(), printLambda);
+            std::cerr << "== ";
+            std::for_each(expectedResponse.begin(), expectedResponse.end(), printLambda);
+            std::cerr << '\n';
             ++testsFailed;
         }
         ++testsRan;
