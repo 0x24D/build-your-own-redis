@@ -1,6 +1,5 @@
 #include "redisserver.h"
 #include "rediscommands.h"
-#include "respparser.h"
 
 RedisServer::RedisServer(unsigned int port) : m_acceptor(m_ctx, tcp::endpoint(tcp::v4(), port)) {}
 
@@ -20,20 +19,17 @@ void RedisServer::handleClient(tcp::socket& socket) {
         } else if (ec) {
             throw boost::system::system_error(ec);
         }
-        std::vector<std::string> parsedRequest {};
-        const DataTypes t {recv[0]};
-        switch (t) {
-            case DataTypes::BulkString:
-            { 
-                parsedRequest = RESPParser::parseRequest<DataTypes::BulkString>(recv, bytesReceived).value();
-                break;
-            }
-            case DataTypes::Array:
-            { 
-                parsedRequest = RESPParser::parseRequest<DataTypes::Array>(recv, bytesReceived).value();
-                break;
-            }
-        }
+        const auto parsedRequest = parseRequest(recv, bytesReceived);
         boost::asio::write(socket, boost::asio::buffer(RedisCommands::getResponse(parsedRequest)), ec);
+    }
+}
+
+std::vector<std::string> RedisServer::parseRequest(const RecvBuffer& recv, size_t bytesReceived) const {
+    const DataTypes t {recv[0]};
+    switch (t) {
+        case DataTypes::BulkString:
+            return RESPParser::parseRequest<DataTypes::BulkString>(recv, bytesReceived).value();
+        case DataTypes::Array:
+            return RESPParser::parseRequest<DataTypes::Array>(recv, bytesReceived).value();
     }
 }

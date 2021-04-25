@@ -1,3 +1,6 @@
+#ifndef RedisCommandsH
+#define RedisCommandsH
+
 #include <functional>
 #include <string>
 #include <vector>
@@ -26,3 +29,5 @@ public:
 private:
     static std::array<RedisCommand, 2> m_commands;
 };
+
+#endif

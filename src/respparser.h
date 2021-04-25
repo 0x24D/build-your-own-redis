@@ -1,3 +1,6 @@
+#ifndef RESPParserH
+#define RESPParserH
+
 #include <array>
 #include <optional>
 #include <string>
@@ -17,13 +20,13 @@ enum struct DataTypes : CharType {
 class RESPParser {
 public:
     template<DataTypes T>
-    static std::optional<std::vector<std::string>> parseRequest(const RecvBuffer&, const size_t) {
+    static inline std::optional<std::vector<std::string>> parseRequest(const RecvBuffer&, const size_t) {
         return {};
     }
 };
 
 template<>
-std::optional<std::vector<std::string>> RESPParser::parseRequest<DataTypes::BulkString>(const RecvBuffer& recv, const size_t) {
+inline std::optional<std::vector<std::string>> RESPParser::parseRequest<DataTypes::BulkString>(const RecvBuffer& recv, const size_t) {
     std::string length {};
     auto it = std::find(recv.begin(), recv.end(), '\r');
     std::copy(recv.begin() + 1, it, std::back_inserter(length));
@@ -32,7 +35,7 @@ std::optional<std::vector<std::string>> RESPParser::parseRequest<DataTypes::Bulk
     return std::vector {str};
 }
 template<>
-std::optional<std::vector<std::string>> RESPParser::parseRequest<DataTypes::Array>(const RecvBuffer& recv, const size_t) {
+inline std::optional<std::vector<std::string>> RESPParser::parseRequest<DataTypes::Array>(const RecvBuffer& recv, const size_t) {
     std::vector<std::string> ret {};
     std::string numElements {};
     const auto numElementsEnd = std::find(recv.begin(), recv.end(), '\r');
@@ -52,3 +55,5 @@ std::optional<std::vector<std::string>> RESPParser::parseRequest<DataTypes::Arra
     }
     return ret;
 }
+
+#endif
