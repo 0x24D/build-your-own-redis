@@ -71,13 +71,14 @@ std::array<RedisCommand, 2> RedisCommands::m_commands = [](){
 
 const std::string RedisCommands::getResponse(const std::vector<std::string>& parsedRequest) {
     std::string response {};
-    std::for_each(m_commands.begin(), m_commands.end(), [&parsedRequest, &response](const auto& c) {
+    for (const auto&c : m_commands) {
         std::string request {};
         std::transform(parsedRequest[0].begin(), parsedRequest[0].end(), std::back_inserter(request), [](unsigned char c) { return std::tolower(c); });
         if (request == c.getName()) {
             response = c.getResponse()(parsedRequest);
+            break;
         }
-    });
+    }
     return response;
 }
 

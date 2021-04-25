@@ -25,14 +25,12 @@ void RedisServer::handleClient(tcp::socket& socket) {
         switch (t) {
             case DataTypes::BulkString:
             { 
-                const auto request = RESPParser::parseRequest<DataTypes::BulkString>(recv, bytesReceived).value();
-                std::copy(request.begin(), request.end(), std::back_inserter(parsedRequest));
+                parsedRequest = RESPParser::parseRequest<DataTypes::BulkString>(recv, bytesReceived).value();
                 break;
             }
             case DataTypes::Array:
             { 
-                const auto request = RESPParser::parseRequest<DataTypes::Array>(recv, bytesReceived).value(); 
-                std::copy(request.begin(), request.end(), std::back_inserter(parsedRequest));
+                parsedRequest = RESPParser::parseRequest<DataTypes::Array>(recv, bytesReceived).value();
                 break;
             }
         }
