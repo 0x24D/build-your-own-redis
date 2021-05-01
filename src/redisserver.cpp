@@ -4,9 +4,11 @@
 RedisServer::RedisServer(unsigned int port) : m_acceptor(m_ctx, tcp::endpoint(tcp::v4(), port)) {}
 
 void RedisServer::listen() {
-    tcp::socket socket{m_ctx};
-    m_acceptor.accept(socket);
-    handleClient(socket);
+    while (true) {
+        tcp::socket socket{m_ctx};
+        m_acceptor.accept(socket);
+        handleClient(socket);
+    }
 }
 
 void RedisServer::handleClient(tcp::socket& socket) {

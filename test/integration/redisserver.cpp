@@ -2,15 +2,21 @@
 #include "../utils/testhelper.h"
 #include "../utils/testclient.h"
 
-void testCommand(TestClient& client) {
+void testCommand() {
+    TestClient client{6379};
+    
     client.send("$7\r\ncommand\r\n");
     TestHelper::startsWith(std::string{"command"}, client.recv(), std::string{"*2\r\n*7\r\n"});
     
     client.send("$7\r\nCOMMAND\r\n");
     TestHelper::startsWith(std::string{"COMMAND"}, client.recv(), std::string{"*2\r\n*7\r\n"});
+    
+    client.close();    
 }
 
-void testPing(TestClient& client) {
+void testPing() {
+    TestClient client{6379};
+    
     client.send("$4\r\nping\r\n");
     TestHelper::equals(std::string{"ping"}, client.recv(), std::string{"+PONG\r\n"});
     
@@ -32,20 +38,18 @@ void testPing(TestClient& client) {
     
     client.send("*2\r\n$4\r\nPING\r\n$12\r\nHello\r\nWorld\r\n");
     TestHelper::equals(std::string{"ping \"Hello\\r\\nWorld\""}, client.recv(), std::string{"$12\r\nHello\r\nWorld\r\n"});
+    
+    client.close();    
 }
 
 int main() {
     RedisServer server{6379};
     std::thread serverThread(&RedisServer::listen, &server);
     
-    TestClient client{6379};
-    
-    testCommand(client);
-    testPing(client);
-    
-    client.close();    
+    testCommand();
+    testPing();
 
-    serverThread.join();
+    serverThread.detach();
     
     TestHelper::result();    
     return 0;
