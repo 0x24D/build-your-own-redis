@@ -49,7 +49,7 @@ const std::function<std::string(const std::vector<std::string>&)> RedisCommand::
 }
 
 std::array<RedisCommand, 2> RedisCommands::m_commands = [](){
-    const auto commandCmdResponse = [](const std::vector<std::string>& parsedRequest) { return RedisCommands::toString(); }; // TODO: Handle COMMAND with additional args.
+    const auto commandCmdResponse = [](const std::vector<std::string>&) { return RedisCommands::toString(); }; // TODO: Handle COMMAND with additional args.
     const auto pingCmdResponse = [](const std::vector<std::string>& parsedRequest) {
         std::string str {};
         if (parsedRequest.size() == 1) {
@@ -71,11 +71,11 @@ std::array<RedisCommand, 2> RedisCommands::m_commands = [](){
 
 const std::string RedisCommands::getResponse(const std::vector<std::string>& parsedRequest) {
     std::string response {};
-    for (const auto&c : m_commands) {
+    for (const auto& command : m_commands) {
         std::string request {};
         std::transform(parsedRequest[0].begin(), parsedRequest[0].end(), std::back_inserter(request), [](unsigned char c) { return std::tolower(c); });
-        if (request == c.getName()) {
-            response = c.getResponse()(parsedRequest);
+        if (request == command.getName()) {
+            response = command.getResponse()(parsedRequest);
             break;
         }
     }
