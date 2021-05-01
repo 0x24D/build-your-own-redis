@@ -3,7 +3,7 @@ unsigned int testsRan = 0;
 unsigned int testsFailed = 0;
 class TestHelper {
 public:
-    static void assert(const std::string& label, const auto& response, const auto& expectedResponse) {
+    static void equals(const std::string& label, const auto& response, const auto& expectedResponse) {
         if (response != expectedResponse) {
             const auto printLambda = [](const auto& v) {
                 std::cerr << v << " ";

@@ -13,5 +13,5 @@ endif(Boost_FOUND)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-add_executable(redis-server main.cpp rediscommands.cpp redisserver.cpp)
-target_link_libraries(redis-server ${Boost_SYSTEM_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
+add_executable(test-integration-redisserver redisserver.cpp ../utils/testclient.cpp ${CMAKE_BINARY_DIR}/src/rediscommands.cpp ${CMAKE_BINARY_DIR}/src/redisserver.cpp)
+target_link_libraries(test-integration-redisserver ${Boost_SYSTEM_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
