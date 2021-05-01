@@ -8,7 +8,7 @@ using boost::asio::ip::tcp;
 
 class RedisServer {
 public:
-    RedisServer(unsigned int port);
+    RedisServer(unsigned int port = 6379);
     void listen();
 private:
     void handleClient(tcp::socket& socket);

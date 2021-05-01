@@ -3,7 +3,7 @@
 #include "../utils/testclient.h"
 
 void testCommand() {
-    TestClient client{6379};
+    TestClient client{};
     
     client.send("$7\r\ncommand\r\n");
     TestHelper::startsWith(std::string{"command"}, client.recv(), std::string{"*2\r\n*7\r\n"});
@@ -13,8 +13,8 @@ void testCommand() {
 }
 
 void testConcurrentClients() {
-    TestClient client1{6379};
-    TestClient client2{6379};
+    TestClient client1{};
+    TestClient client2{};
 
     client1.send("$4\r\nping\r\n");
     client1.recv();
@@ -24,7 +24,7 @@ void testConcurrentClients() {
 }
 
 void testPing() {
-    TestClient client{6379};
+    TestClient client{};
     
     client.send("$4\r\nping\r\n");
     TestHelper::equals(std::string{"ping"}, client.recv(), std::string{"+PONG\r\n"});
@@ -50,7 +50,7 @@ void testPing() {
 }
 
 int main() {
-    RedisServer server{6379};
+    RedisServer server{};
     std::thread serverThread(&RedisServer::listen, &server);
     
     testCommand();

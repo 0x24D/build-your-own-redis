@@ -7,8 +7,7 @@ using boost::asio::ip::tcp;
 
 class TestClient {
 public:
-    TestClient() = delete;
-    TestClient(unsigned int port);
+    TestClient(unsigned int port=6379);
     ~TestClient();
     TestClient(TestClient&&) = delete;
     TestClient(const TestClient&) = delete;

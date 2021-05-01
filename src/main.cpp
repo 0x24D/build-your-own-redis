@@ -1,7 +1,7 @@
 #include "redisserver.h"
 
 int main() {
-    RedisServer server{6379};
+    RedisServer server{};
     server.listen();
 
     return 0;
