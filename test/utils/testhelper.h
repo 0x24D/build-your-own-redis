@@ -17,6 +17,20 @@ public:
         }
         ++testsRan;
     }
+    static void startsWith(const std::string& label, const auto& response, const auto& expectedStart) {
+        if (!response.starts_with(expectedStart)) {
+            const auto printLambda = [](const auto& v) {
+                std::cerr << v << " ";
+            };
+            std::cerr << "Test case '" << label << "' failed\n";
+            std::for_each(response.begin(), response.end(), printLambda);
+            std::cerr << "startsWith ";
+            std::for_each(expectedStart.begin(), expectedStart.end(), printLambda);
+            std::cerr << '\n';
+            ++testsFailed;
+        }
+        ++testsRan;
+    }
     static void result() {
         if (testsFailed == 0) {
             std::cout << "All test cases passed\n";

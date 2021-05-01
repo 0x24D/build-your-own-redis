@@ -7,7 +7,11 @@ int main() {
     std::thread serverThread(&RedisServer::listen, &server);
     TestClient client{6379};
     
-    // TODO: "command" response starts with "*numCommands*7\r\n       
+    client.send("$7\r\ncommand\r\n");
+    TestHelper::startsWith(std::string{"command"}, client.recv(), std::string{"*2\r\n*7\r\n"});
+    
+    client.send("$7\r\nCOMMAND\r\n");
+    TestHelper::startsWith(std::string{"COMMAND"}, client.recv(), std::string{"*2\r\n*7\r\n"});
 
     client.send("$4\r\nping\r\n");
     TestHelper::equals(std::string{"ping"}, client.recv(), std::string{"+PONG\r\n"});

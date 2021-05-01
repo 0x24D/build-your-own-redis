@@ -2,7 +2,8 @@
 #include "../utils/testhelper.h"
 
 int main() {
-    // TODO: "command" response starts with "*numCommands*7\r\n
+    TestHelper::startsWith("command", RedisCommands::getResponse({"command"}), std::string{"*2\r\n*7\r\n"});
+    TestHelper::startsWith("COMMAND", RedisCommands::getResponse({"COMMAND"}), std::string{"*2\r\n*7\r\n"});
     TestHelper::equals("ping", RedisCommands::getResponse({"ping"}), std::string{"+PONG\r\n"});
     TestHelper::equals("PING", RedisCommands::getResponse({"PING"}), std::string{"+PONG\r\n"});
     TestHelper::equals("ping Hello", RedisCommands::getResponse({"ping", "Hello"}), std::string{"$5\r\nHello\r\n"});

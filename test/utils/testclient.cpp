@@ -11,7 +11,7 @@ void TestClient::send(const std::string& cmd) {
 }
 
 std::string TestClient::recv() {
-    std::array<unsigned char, 128> recv;
+    std::array<unsigned char, 1024> recv;
     boost::system::error_code ec;
     size_t bytesReceived;
     do {
