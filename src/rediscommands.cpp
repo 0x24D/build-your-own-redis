@@ -1,4 +1,5 @@
 #include "rediscommands.h"
+#include <algorithm>
 
 RedisCommand::RedisCommand(std::string name, int arity, std::vector<std::string> flags, unsigned int firstKeyPosition, int lastKeyPosition, unsigned int stepCount, std::vector<std::string> tags, std::function<std::string(const std::vector<std::string>&)> response) : m_name(name), m_arity(arity), m_flags(flags), m_firstKeyPosition(firstKeyPosition), m_lastKeyPosition(lastKeyPosition), m_stepCount(stepCount), m_tags(tags), m_response(response) {}
 
@@ -73,7 +74,7 @@ const std::string RedisCommands::getResponse(const std::vector<std::string>& par
     std::string response {};
     for (const auto& command : m_commands) {
         std::string request {};
-        std::transform(parsedRequest[0].begin(), parsedRequest[0].end(), std::back_inserter(request), [](unsigned char c) { return std::tolower(c); });
+        std::ranges::transform(parsedRequest[0], std::back_inserter(request), [](unsigned char c) { return std::tolower(c); });
         if (request == command.getName()) {
             response = command.getResponse()(parsedRequest);
             break;
