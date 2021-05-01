@@ -10,8 +10,6 @@ void testCommand() {
     
     client.send("$7\r\nCOMMAND\r\n");
     TestHelper::startsWith(std::string{"COMMAND"}, client.recv(), std::string{"*2\r\n*7\r\n"});
-    
-    client.close();    
 }
 
 void testConcurrentClients() {
@@ -23,9 +21,6 @@ void testConcurrentClients() {
 
     client2.send("$4\r\nping\r\n");
     client2.recv();
-
-    client1.close();
-    client2.close();
 }
 
 void testPing() {
@@ -52,8 +47,6 @@ void testPing() {
     
     client.send("*2\r\n$4\r\nPING\r\n$12\r\nHello\r\nWorld\r\n");
     TestHelper::equals(std::string{"ping \"Hello\\r\\nWorld\""}, client.recv(), std::string{"$12\r\nHello\r\nWorld\r\n"});
-    
-    client.close();    
 }
 
 int main() {
