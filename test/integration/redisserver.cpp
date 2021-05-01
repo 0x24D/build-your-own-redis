@@ -14,6 +14,20 @@ void testCommand() {
     client.close();    
 }
 
+void testConcurrentClients() {
+    TestClient client1{6379};
+    TestClient client2{6379};
+
+    client1.send("$4\r\nping\r\n");
+    client1.recv();
+
+    client2.send("$4\r\nping\r\n");
+    client2.recv();
+
+    client1.close();
+    client2.close();
+}
+
 void testPing() {
     TestClient client{6379};
     
@@ -47,10 +61,11 @@ int main() {
     std::thread serverThread(&RedisServer::listen, &server);
     
     testCommand();
+    // TODO: Implement concurrent clients
+    //testConcurrentClients();
     testPing();
 
     serverThread.detach();
     
-    TestHelper::result();    
-    return 0;
+    return TestHelper::result("integration/redisserver");
 }

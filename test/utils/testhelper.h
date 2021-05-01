@@ -31,11 +31,17 @@ public:
         }
         ++testsRan;
     }
-    static void result() {
+    static int result(const std::string& label) {
         if (testsFailed == 0) {
-            std::cout << "All test cases passed\n";
+            std::cout << label << ": all test cases passed\n";
+            return 0;
         } else {
-            std::cerr << '\n' << std::to_string(testsFailed) << " test cases failed\n";
+            std::cerr << label << ": " << std::to_string(testsFailed) << " test case";
+            if (testsFailed != 1) {
+                std::cerr << 's';
+            }
+            std::cerr <<" failed\n";
+            return 1;
         }
     }
 };

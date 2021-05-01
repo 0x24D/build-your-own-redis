@@ -22,6 +22,5 @@ int main() {
     testArray();
     testBulkString();
 
-    TestHelper::result();
-    return 0;
+    return TestHelper::result("unit/respparser");
 }

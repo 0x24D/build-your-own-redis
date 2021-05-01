@@ -21,6 +21,5 @@ int main() {
     testCommand();
     testPing();
 
-    TestHelper::result();
-    return 0;
+    return TestHelper::result("unit/rediscommands");
 }
