@@ -35,6 +35,7 @@ inline std::optional<std::vector<std::string>> RESPParser::parseRequest<DataType
     const std::string str {it, it + std::stoi(length)};
     return std::vector {str};
 }
+
 template<>
 inline std::optional<std::vector<std::string>> RESPParser::parseRequest<DataTypes::Array>(const RecvBuffer& recv, const size_t) {
     std::vector<std::string> ret {};

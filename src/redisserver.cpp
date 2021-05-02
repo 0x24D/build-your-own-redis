@@ -36,7 +36,7 @@ std::vector<std::string> RedisServer::parseRequest(const RecvBuffer& recv, size_
         case DataTypes::SimpleString:
         case DataTypes::Error:
         case DataTypes::Integer:
-            throw std::runtime_error("Unhandled data type: '" + recv[0] + '\'');
+            throw std::runtime_error(std::string{"Unhandled data type: '", recv[0],  '\''});
     }
-    throw std::runtime_error("Unknown data type: '" + recv[0] + '\'');
+    throw std::runtime_error(std::string{"Unknown data type: '", recv[0], '\''});
 }
