@@ -7,11 +7,14 @@
 
 class RedisCommand {
 public:
-    RedisCommand(std::string name, int arity, std::vector<std::string> flags, unsigned int firstKeyPosition, int lastKeyPosition, unsigned int stepCount, std::vector<std::string> tags, std::function<std::string(const std::vector<std::string>&)> response);
+    RedisCommand(std::string name, int arity, std::vector<std::string> flags,
+        unsigned int firstKeyPosition, int lastKeyPosition, unsigned int stepCount,
+        std::vector<std::string> tags,
+        std::function<std::string(const std::vector<std::string>&)> response);
     const std::string toString() const;
     const std::string getName() const;
     const std::function<std::string(const std::vector<std::string>&)> getResponse() const;
-private:    
+private:
     std::string m_name;
     int m_arity;
     std::vector<std::string> m_flags;

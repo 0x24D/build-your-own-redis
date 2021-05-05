@@ -3,7 +3,8 @@ unsigned int testsRan = 0;
 unsigned int testsFailed = 0;
 class TestHelper {
 public:
-    static void equals(const std::string& label, const auto& response, const auto& expectedResponse) {
+    static void equals(
+        const std::string& label, const auto& response, const auto& expectedResponse) {
         if (response != expectedResponse) {
             const auto printLambda = [](const auto& v) {
                 std::cerr << v << " ";
@@ -17,7 +18,8 @@ public:
         }
         ++testsRan;
     }
-    static void startsWith(const std::string& label, const auto& response, const auto& expectedStart) {
+    static void startsWith(
+        const std::string& label, const auto& response, const auto& expectedStart) {
         if (!response.starts_with(expectedStart)) {
             const auto printLambda = [](const auto& v) {
                 std::cerr << v << " ";
@@ -40,9 +42,8 @@ public:
             if (testsFailed != 1) {
                 std::cerr << 's';
             }
-            std::cerr <<" failed\n";
+            std::cerr << " failed\n";
             return 1;
         }
     }
 };
-

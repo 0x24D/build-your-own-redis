@@ -1,7 +1,8 @@
 #include "testclient.h"
 
 TestClient::TestClient(unsigned int port) : m_resolver{m_ctx}, m_socket{m_ctx} {
-    const auto endpoints = m_resolver.resolve("localhost", std::to_string(port), tcp::resolver::query::canonical_name);
+    const auto endpoints =
+        m_resolver.resolve("localhost", std::to_string(port), tcp::resolver::query::canonical_name);
     boost::asio::connect(m_socket, endpoints);
 }
 

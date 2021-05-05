@@ -1,8 +1,8 @@
 #ifndef RedisServerH
 #define RedisServerH
 
-#include "respparser.h"
 #include <boost/asio.hpp>
+#include "respparser.h"
 
 using boost::asio::ip::tcp;
 
