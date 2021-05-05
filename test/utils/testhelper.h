@@ -1,8 +1,7 @@
 #include <iostream>
-unsigned int testsRan = 0;
-unsigned int testsFailed = 0;
-class TestHelper {
-public:
+namespace TestHelper {
+    unsigned int testsRan = 0;
+    unsigned int testsFailed = 0;
     static void equals(
         const std::string& label, const auto& response, const auto& expectedResponse) {
         if (response != expectedResponse) {
@@ -46,4 +45,4 @@ public:
             return 1;
         }
     }
-};
+}

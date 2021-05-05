@@ -8,6 +8,8 @@ AllowShortLoopsOnASingleLine: false
 BasedOnStyle: Google
 ColumnLimit: 100
 EmptyLineBeforeAccessModifier: Never
+FixNamespaceComments: false
 IncludeBlocks: Merge
 IndentWidth: 4
+NamespaceIndentation: All
 Standard: c++20
