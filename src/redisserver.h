@@ -12,7 +12,7 @@ public:
     void listen();
 private:
     void handleClient(tcp::socket& socket);
-    std::vector<std::string> parseRequest(const RecvBuffer& recv, size_t bytesReceived) const;
+    std::vector<std::string> parseRequest(const RecvBuffer& recv) const;
     boost::asio::io_context m_ctx;
     tcp::acceptor m_acceptor;
 };

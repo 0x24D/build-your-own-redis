@@ -66,7 +66,7 @@ std::array<RedisCommand, 2> RedisCommands::m_commands = []() {
         return RedisCommands::toString();
     };  // TODO: Handle COMMAND with additional args.
     const auto pingCmdResponse = [](const std::vector<std::string>& parsedRequest) {
-        std::string str{};
+        std::string str;
         if (parsedRequest.size() == 1) {
             str = "+PONG\r\n";
         } else {
@@ -90,9 +90,9 @@ std::array<RedisCommand, 2> RedisCommands::m_commands = []() {
 }();
 
 const std::string RedisCommands::getResponse(const std::vector<std::string>& parsedRequest) {
-    std::string response{};
+    std::string response;
     for (const auto& command : m_commands) {
-        std::string request{};
+        std::string request;
         std::ranges::transform(parsedRequest[0], std::back_inserter(request), [](unsigned char c) {
             return std::tolower(c);
         });

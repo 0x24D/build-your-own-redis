@@ -22,17 +22,16 @@ class RESPParser {
 public:
     template <DataTypes T>
     static inline std::optional<std::vector<std::string>> parseRequest(
-        const RecvBuffer&, const size_t) {
+        const RecvBuffer&) {
         return {};
     }
 };
 
 template <>
 inline std::optional<std::vector<std::string>> RESPParser::parseRequest<DataTypes::BulkString>(
-    const RecvBuffer& recv, const size_t) {
-    std::string length{};
+    const RecvBuffer& recv) {
     auto it = std::ranges::find(recv, '\r');
-    std::copy(recv.begin() + 1, it, std::back_inserter(length));
+    const std::string length{recv.begin() + 1, it};
     it += 2;
     const std::string str{it, it + std::stoi(length)};
     return std::vector{str};
@@ -40,21 +39,18 @@ inline std::optional<std::vector<std::string>> RESPParser::parseRequest<DataType
 
 template <>
 inline std::optional<std::vector<std::string>> RESPParser::parseRequest<DataTypes::Array>(
-    const RecvBuffer& recv, const size_t) {
+    const RecvBuffer& recv) {
     std::vector<std::string> ret{};
-    std::string numElements{};
     const auto numElementsEnd = std::ranges::find(recv, '\r');
-    std::copy(recv.begin() + 1, numElementsEnd, std::back_inserter(numElements));
+    const std::string numElements{recv.begin() + 1, numElementsEnd};
     auto stringStart = numElementsEnd + 2;
     for (auto i = 0; i < std::stoi(numElements); ++i) {
         const DataTypes t{*stringStart};
         if (t == DataTypes::BulkString) {
             RecvBuffer bulkString{};
             std::copy(stringStart, recv.end(), bulkString.begin());
-            const auto bytesToSend = std::distance(stringStart, recv.end()) + 1;
-            const auto request =
-                parseRequest<DataTypes::BulkString>(bulkString, bytesToSend).value();
-            std::ranges::copy(request, std::back_inserter(ret));
+            const auto request = parseRequest<DataTypes::BulkString>(bulkString).value();
+            ret.insert(ret.end(), request.begin(), request.end());
             const auto returnSize = ret[i].size();
             stringStart += (1 + std::to_string(returnSize).size() + 2 + returnSize +
                             2);  // DataType, size of string length, \r\n, length of string, \r\n
