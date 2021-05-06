@@ -24,8 +24,7 @@ void testArray() {
         std::vector{std::string{"Hello World"}, std::string{"World Hello"}});
 
     TestHelper::equals("Array of 1 Bulk String with Newline",
-        RESPParser::parseRequest<DataTypes::Array>(
-            RecvBuffer{"*1\r\n$12\r\nHello\r\nWorld\r\n"})
+        RESPParser::parseRequest<DataTypes::Array>(RecvBuffer{"*1\r\n$12\r\nHello\r\nWorld\r\n"})
             .value(),
         std::vector{std::string{"Hello\r\nWorld"}});
 
@@ -52,8 +51,7 @@ void testBulkString() {
         std::vector{std::string{"Hello\r\nWorld"}});
 
     TestHelper::equals("Bulk String with Newline (Unquoted)",
-        RESPParser::parseRequest<DataTypes::BulkString>(
-            RecvBuffer{"$14\r\nHello\\r\\nWorld\r\n"})
+        RESPParser::parseRequest<DataTypes::BulkString>(RecvBuffer{"$14\r\nHello\\r\\nWorld\r\n"})
             .value(),
         std::vector{std::string{"Hello\\r\\nWorld"}});
 }

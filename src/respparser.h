@@ -21,8 +21,7 @@ enum struct DataTypes : CharType {
 class RESPParser {
 public:
     template <DataTypes T>
-    static inline std::optional<std::vector<std::string>> parseRequest(
-        const RecvBuffer&) {
+    static inline std::optional<std::vector<std::string>> parseRequest(const RecvBuffer&) {
         return {};
     }
 };
