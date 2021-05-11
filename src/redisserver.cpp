@@ -27,7 +27,7 @@ void RedisServer::handleClient(tcp::socket& socket) {
     }
 }
 
-std::vector<std::string> RedisServer::parseRequest(const RecvBuffer& recv) const {
+[[nodiscard]] std::vector<std::string> RedisServer::parseRequest(const RecvBuffer& recv) const {
     const DataTypes t{recv[0]};
     switch (t) {
         case DataTypes::BulkString:

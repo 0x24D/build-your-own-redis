@@ -11,9 +11,9 @@ public:
         unsigned int firstKeyPosition, int lastKeyPosition, unsigned int stepCount,
         std::vector<std::string> tags,
         std::function<std::string(const std::vector<std::string>&)> response);
-    const std::string toString() const;
-    const std::string getName() const;
-    const std::function<std::string(const std::vector<std::string>&)> getResponse() const;
+    [[nodiscard]] auto toString() const noexcept;
+    [[nodiscard]] auto getName() const noexcept;
+    [[nodiscard]] auto getResponse() const noexcept;
 private:
     std::string m_name;
     int m_arity;
@@ -27,8 +27,9 @@ private:
 
 class RedisCommands {
 public:
-    static const std::string getResponse(const std::vector<std::string>& parsedRequest);
-    static const std::string toString();
+    [[nodiscard]] static std::string getResponse(
+        const std::vector<std::string>& parsedRequest) noexcept;
+    [[nodiscard]] static auto toString() noexcept;
 private:
     static std::array<RedisCommand, 2> m_commands;
 };

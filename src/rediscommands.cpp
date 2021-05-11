@@ -14,7 +14,7 @@ RedisCommand::RedisCommand(std::string name, int arity, std::vector<std::string>
       m_tags(tags),
       m_response(response) {}
 
-const std::string RedisCommand::toString() const {
+[[nodiscard]] auto RedisCommand::toString() const noexcept {
     std::string str{"*7\r\n"};
     str += '$';
     str += std::to_string(m_name.size());
@@ -52,13 +52,38 @@ const std::string RedisCommand::toString() const {
     return str;
 }
 
-const std::string RedisCommand::getName() const {
+[[nodiscard]] auto RedisCommand::getName() const noexcept {
     return m_name;
 }
 
-const std::function<std::string(const std::vector<std::string>&)> RedisCommand::getResponse()
-    const {
+[[nodiscard]] auto RedisCommand::getResponse() const noexcept {
     return m_response;
+}
+
+[[nodiscard]] std::string RedisCommands::getResponse(
+    const std::vector<std::string>& parsedRequest) noexcept {
+    std::string response;
+    for (const auto& command : m_commands) {
+        std::string request;
+        std::ranges::transform(parsedRequest[0], std::back_inserter(request), [](unsigned char c) {
+            return std::tolower(c);
+        });
+        if (request == command.getName()) {
+            response = command.getResponse()(parsedRequest);
+            break;
+        }
+    }
+    return response;
+}
+
+[[nodiscard]] auto RedisCommands::toString() noexcept {
+    std::string str{'*'};
+    str += std::to_string(m_commands.size());
+    str += "\r\n";
+    for (const auto& command : m_commands) {
+        str += command.toString();
+    }
+    return str;
 }
 
 std::array<RedisCommand, 2> RedisCommands::m_commands = []() {
@@ -88,28 +113,3 @@ std::array<RedisCommand, 2> RedisCommands::m_commands = []() {
     // clang-format on
     return std::array{commandCmd, pingCmd};
 }();
-
-const std::string RedisCommands::getResponse(const std::vector<std::string>& parsedRequest) {
-    std::string response;
-    for (const auto& command : m_commands) {
-        std::string request;
-        std::ranges::transform(parsedRequest[0], std::back_inserter(request), [](unsigned char c) {
-            return std::tolower(c);
-        });
-        if (request == command.getName()) {
-            response = command.getResponse()(parsedRequest);
-            break;
-        }
-    }
-    return response;
-}
-
-const std::string RedisCommands::toString() {
-    std::string str{'*'};
-    str += std::to_string(m_commands.size());
-    str += "\r\n";
-    for (const auto& command : m_commands) {
-        str += command.toString();
-    }
-    return str;
-}
