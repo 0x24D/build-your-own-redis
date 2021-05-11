@@ -8,11 +8,11 @@ using boost::asio::ip::tcp;
 
 class RedisServer {
 public:
-    RedisServer(unsigned int port = 6379);
+    [[nodiscard]] RedisServer(unsigned int port = 6379);
     void listen();
 private:
     void handleClient(tcp::socket& socket);
-    [[nodiscard]] std::vector<std::string> parseRequest(const RecvBuffer& recv) const;
+    [[nodiscard]] auto parseRequest(const RecvBuffer& recv) const;
     boost::asio::io_context m_ctx;
     tcp::acceptor m_acceptor;
 };

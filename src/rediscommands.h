@@ -7,7 +7,7 @@
 
 class RedisCommand {
 public:
-    RedisCommand(std::string name, int arity, std::vector<std::string> flags,
+    [[nodiscard]] RedisCommand(std::string name, int arity, std::vector<std::string> flags,
         unsigned int firstKeyPosition, int lastKeyPosition, unsigned int stepCount,
         std::vector<std::string> tags,
         std::function<std::string(const std::vector<std::string>&)> response);
@@ -27,8 +27,8 @@ private:
 
 class RedisCommands {
 public:
-    [[nodiscard]] static std::string getResponse(
-        const std::vector<std::string>& parsedRequest) noexcept;
+    [[nodiscard]] static auto getResponse(const std::vector<std::string>& parsedRequest) noexcept
+        -> std::string;
     [[nodiscard]] static auto toString() noexcept;
 private:
     static std::array<RedisCommand, 2> m_commands;

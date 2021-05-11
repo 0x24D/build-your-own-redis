@@ -11,23 +11,7 @@ void RedisServer::listen() {
     }
 }
 
-void RedisServer::handleClient(tcp::socket& socket) {
-    while (true) {
-        RecvBuffer recv{};
-        boost::system::error_code ec;
-        socket.read_some(boost::asio::buffer(recv), ec);
-        if (ec == boost::asio::error::eof) {
-            break;
-        } else if (ec) {
-            throw boost::system::system_error(ec);
-        }
-        const auto parsedRequest = parseRequest(recv);
-        boost::asio::write(
-            socket, boost::asio::buffer(RedisCommands::getResponse(parsedRequest)), ec);
-    }
-}
-
-[[nodiscard]] std::vector<std::string> RedisServer::parseRequest(const RecvBuffer& recv) const {
+auto RedisServer::parseRequest(const RecvBuffer& recv) const {
     const DataTypes t{recv[0]};
     switch (t) {
         case DataTypes::BulkString:
@@ -42,4 +26,20 @@ void RedisServer::handleClient(tcp::socket& socket) {
     }
     throw std::runtime_error(
         "Unknown data type: '" + std::string{static_cast<char>(recv[0]), '\''});
+}
+
+void RedisServer::handleClient(tcp::socket& socket) {
+    while (true) {
+        RecvBuffer recv{};
+        boost::system::error_code ec;
+        socket.read_some(boost::asio::buffer(recv), ec);
+        if (ec == boost::asio::error::eof) {
+            break;
+        } else if (ec) {
+            throw boost::system::system_error(ec);
+        }
+        const auto parsedRequest = parseRequest(recv);
+        boost::asio::write(
+            socket, boost::asio::buffer(RedisCommands::getResponse(parsedRequest)), ec);
+    }
 }

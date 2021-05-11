@@ -32,7 +32,7 @@ namespace TestHelper {
         }
         ++testsRan;
     }
-    static int result(const std::string& label) {
+    static auto result(const std::string& label) {
         if (testsFailed == 0) {
             std::cout << label << ": all test cases passed\n";
             return 0;

@@ -21,15 +21,15 @@ enum struct DataTypes : CharType {
 class RESPParser {
 public:
     template <DataTypes T>
-    [[nodiscard]] static inline std::optional<std::vector<std::string>> parseRequest(
-        const RecvBuffer&) noexcept {
+    [[nodiscard]] static inline auto parseRequest(const RecvBuffer&) noexcept
+        -> std::optional<std::vector<std::string>> {
         return {};
     }
 };
 
 template <>
-[[nodiscard]] inline std::optional<std::vector<std::string>>
-RESPParser::parseRequest<DataTypes::BulkString>(const RecvBuffer& recv) noexcept {
+[[nodiscard]] inline auto RESPParser::parseRequest<DataTypes::BulkString>(
+    const RecvBuffer& recv) noexcept -> std::optional<std::vector<std::string>> {
     auto it = std::ranges::find(recv, '\r');
     const std::string length{recv.cbegin() + 1, it};
     it += 2;
@@ -38,8 +38,8 @@ RESPParser::parseRequest<DataTypes::BulkString>(const RecvBuffer& recv) noexcept
 }
 
 template <>
-[[nodiscard]] inline std::optional<std::vector<std::string>>
-RESPParser::parseRequest<DataTypes::Array>(const RecvBuffer& recv) noexcept {
+[[nodiscard]] inline auto RESPParser::parseRequest<DataTypes::Array>(
+    const RecvBuffer& recv) noexcept -> std::optional<std::vector<std::string>> {
     std::vector<std::string> ret{};
     const auto numElementsEnd = std::ranges::find(recv, '\r');
     const std::string numElements{recv.begin() + 1, numElementsEnd};

@@ -14,7 +14,7 @@ RedisCommand::RedisCommand(std::string name, int arity, std::vector<std::string>
       m_tags(tags),
       m_response(response) {}
 
-[[nodiscard]] auto RedisCommand::toString() const noexcept {
+auto RedisCommand::toString() const noexcept {
     std::string str{"*7\r\n"};
     str += '$';
     str += std::to_string(m_name.size());
@@ -52,16 +52,16 @@ RedisCommand::RedisCommand(std::string name, int arity, std::vector<std::string>
     return str;
 }
 
-[[nodiscard]] auto RedisCommand::getName() const noexcept {
+auto RedisCommand::getName() const noexcept {
     return m_name;
 }
 
-[[nodiscard]] auto RedisCommand::getResponse() const noexcept {
+auto RedisCommand::getResponse() const noexcept {
     return m_response;
 }
 
-[[nodiscard]] std::string RedisCommands::getResponse(
-    const std::vector<std::string>& parsedRequest) noexcept {
+auto RedisCommands::getResponse(const std::vector<std::string>& parsedRequest) noexcept
+    -> std::string {
     std::string response;
     for (const auto& command : m_commands) {
         std::string request;
@@ -76,7 +76,7 @@ RedisCommand::RedisCommand(std::string name, int arity, std::vector<std::string>
     return response;
 }
 
-[[nodiscard]] auto RedisCommands::toString() noexcept {
+auto RedisCommands::toString() noexcept {
     std::string str{'*'};
     str += std::to_string(m_commands.size());
     str += "\r\n";

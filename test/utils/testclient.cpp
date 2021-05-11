@@ -10,12 +10,12 @@ TestClient::~TestClient() {
     m_socket.close();
 }
 
-void TestClient::send(const std::string& cmd) {
+void TestClient::send(const std::string& cmd) noexcept {
     boost::system::error_code ec;
     boost::asio::write(m_socket, boost::asio::buffer(cmd), ec);
 }
 
-std::string TestClient::recv() {
+[[maybe_unused]] auto TestClient::recv() noexcept -> std::string {
     std::array<unsigned char, 1024> recv;
     boost::system::error_code ec;
     size_t bytesReceived;
