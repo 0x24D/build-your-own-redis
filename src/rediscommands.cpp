@@ -108,7 +108,7 @@ std::array<RedisCommand, 2> RedisCommands::m_commands = []() {
         {"@slow", "@connection"}, commandCmdResponse};
     // TODO: Unsure why clang-format puts all arguments below on one line instead of splitting.
     // clang-format off
-    const RedisCommand pingCmd{"ping", -1, {"stale", "fast"}, 0, 0, 0, 
+    const RedisCommand pingCmd{"ping", -1, {"stale", "fast"}, 0, 0, 0,
         {"@fast", "@connection"}, pingCmdResponse};
     // clang-format on
     return std::array{commandCmd, pingCmd};
