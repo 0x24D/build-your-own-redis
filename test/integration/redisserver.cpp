@@ -58,8 +58,7 @@ int main() {
     std::thread serverThread(&RedisServer::listen, &server);
 
     testCommand();
-    // TODO: Implement concurrent clients
-    // testConcurrentClients();
+    testConcurrentClients();
     testPing();
 
     serverThread.detach();
