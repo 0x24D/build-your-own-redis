@@ -18,6 +18,35 @@ void testCommand() {
 
     client.send("*2\r\n$7\r\nCOMMAND\r\n$5\r\nCOUNT\r\n");
     TestHelper::equals("COMMAND COUNT", client.recv(), std::string_view{":3\r\n"});
+
+    // Specific command details
+    client.send("*3\r\n$7\r\ncommand\r\n$4\r\ninfo\r\n$4\r\nping\r\n");
+    TestHelper::startsWith("command info ping", client.recv(), std::string_view{"*1\r\n*7\r\n"});
+
+    client.send("*3\r\n$7\r\nCOMMAND\r\n$4\r\nINFO\r\n$4\r\nPING\r\n");
+    TestHelper::startsWith("COMMAND INFO PING", client.recv(), std::string_view{"*1\r\n*7\r\n"});
+
+    client.send("*4\r\n$7\r\ncommand\r\n$4\r\ninfo\r\n$4\r\necho\r\n$4\r\nping\r\n");
+    TestHelper::startsWith(
+        "command info echo ping", client.recv(), std::string_view{"*2\r\n*7\r\n"});
+
+    client.send("*4\r\n$7\r\nCOMMAND\r\n$4\r\nINFO\r\n$4\r\nECHO\r\n$4\r\nPING\r\n");
+    TestHelper::startsWith(
+        "COMMAND INFO ECHO PING", client.recv(), std::string_view{"*2\r\n*7\r\n"});
+
+    // No command
+    client.send("*2\r\n$7\r\ncommand\r\n$4\r\ninfo\r\n");
+    TestHelper::equals("command info", client.recv(), std::string_view{"*0\r\n"});
+
+    client.send("*2\r\n$7\r\nCOMMAND\r\n$4\r\nINFO\r\n");
+    TestHelper::equals("COMMAND INFO", client.recv(), std::string_view{"*0\r\n"});
+
+    // Non-existing command
+    client.send("*3\r\n$7\r\ncommand\r\n$4\r\ninfo\r\n$3\r\nfoo\r\n");
+    TestHelper::equals("command info foo", client.recv(), std::string_view{"*1\r\n*0\r\n"});
+
+    client.send("*3\r\n$7\r\nCOMMAND\r\n$4\r\nINFO\r\n$3\r\nFOO\r\n");
+    TestHelper::equals("COMMAND INFO FOO", client.recv(), std::string_view{"*1\r\n*0\r\n"});
 }
 
 void testConcurrentClients() {

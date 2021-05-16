@@ -79,6 +79,13 @@ namespace {
     }
 }
 
+auto RedisCommands::getCommand(std::string_view str) noexcept {
+    const auto found = std::ranges::find_if(m_commands, [str](const auto& cmd) {
+        return cmd.getName() == toLower(str);
+    });
+    return found != m_commands.end() ? std::optional<RedisCommand>(*found) : std::nullopt;
+}
+
 auto RedisCommands::getResponse(const std::vector<std::string>& parsedRequest) noexcept
     -> std::string {
     std::string response;
@@ -112,10 +119,21 @@ namespace ResponseCallbacks {
         if (parsedRequest.size() == 1) {
             return RedisCommands::toString();
         } else {
-            if (toLower(parsedRequest[1]) == "count") {
+            const auto arg = toLower(parsedRequest[1]);
+            if (arg == "count") {
                 std::string str{':'};
                 str += std::to_string(RedisCommands::size());
                 str += "\r\n";
+                return str;
+            } else if (arg == "info") {
+                const auto numArgs = parsedRequest.size() - 2;
+                std::string str{'*'};
+                str += std::to_string(numArgs);
+                str += "\r\n";
+                for (std::size_t i = 2; i < parsedRequest.size(); ++i) {
+                    const auto cmd = RedisCommands::getCommand(parsedRequest[i]);
+                    str += cmd ? cmd.value().toString() : "*0\r\n";
+                }
                 return str;
             }
             // TODO: error handling for invalid argument

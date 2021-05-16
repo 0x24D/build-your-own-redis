@@ -2,7 +2,7 @@
 #include "../utils/testhelper.h"
 
 void testCommand() {
-    // Command details
+    // All command details
     TestHelper::startsWith(
         "command", RedisCommands::getResponse({"command"}), std::string_view{"*3\r\n*7\r\n"});
 
@@ -15,6 +15,35 @@ void testCommand() {
 
     TestHelper::equals("COMMAND COUNT", RedisCommands::getResponse({"COMMAND", "COUNT"}),
         std::string_view{":3\r\n"});
+
+    // Specific command details
+    TestHelper::startsWith("command info ping",
+        RedisCommands::getResponse({"command", "info", "ping"}), std::string_view{"*1\r\n*7\r\n"});
+
+    TestHelper::startsWith("COMMAND INFO PING",
+        RedisCommands::getResponse({"COMMAND", "INFO", "PING"}), std::string_view{"*1\r\n*7\r\n"});
+
+    TestHelper::startsWith("command info echo ping",
+        RedisCommands::getResponse({"command", "info", "echo", "ping"}),
+        std::string_view{"*2\r\n*7\r\n"});
+
+    TestHelper::startsWith("COMMAND INFO ECHO PING",
+        RedisCommands::getResponse({"COMMAND", "INFO", "ECHO", "PING"}),
+        std::string_view{"*2\r\n*7\r\n"});
+
+    // No command
+    TestHelper::equals("command info", RedisCommands::getResponse({"command", "info"}),
+        std::string_view{"*0\r\n"});
+
+    TestHelper::equals("COMMAND INFO", RedisCommands::getResponse({"COMMAND", "INFO"}),
+        std::string_view{"*0\r\n"});
+
+    // Non-existing command
+    TestHelper::equals("command info foo", RedisCommands::getResponse({"command", "info", "foo"}),
+        std::string_view{"*1\r\n*0\r\n"});
+
+    TestHelper::equals("COMMAND INFO FOO", RedisCommands::getResponse({"COMMAND", "INFO", "FOO"}),
+        std::string_view{"*1\r\n*0\r\n"});
 }
 
 void testEcho() {
