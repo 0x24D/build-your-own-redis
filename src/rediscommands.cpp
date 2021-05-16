@@ -4,7 +4,7 @@
 RedisCommand::RedisCommand(std::string name, int arity, std::vector<std::string> flags,
     unsigned int firstKeyPosition, int lastKeyPosition, unsigned int stepCount,
     std::vector<std::string> tags,
-    std::function<std::string(const std::vector<std::string>&)> response)
+    std::function<std::string(const std::vector<std::string>&)> callback)
     : m_name(name),
       m_arity(arity),
       m_flags(flags),
@@ -12,7 +12,7 @@ RedisCommand::RedisCommand(std::string name, int arity, std::vector<std::string>
       m_lastKeyPosition(lastKeyPosition),
       m_stepCount(stepCount),
       m_tags(tags),
-      m_response(response) {}
+      m_callback(callback) {}
 
 auto RedisCommand::toString() const noexcept {
     std::string str{"*7\r\n"};
@@ -56,8 +56,8 @@ auto RedisCommand::getName() const noexcept {
     return m_name;
 }
 
-auto RedisCommand::getResponse() const noexcept {
-    return m_response;
+auto RedisCommand::getCallback() const noexcept {
+    return m_callback;
 }
 
 auto RedisCommands::getResponse(const std::vector<std::string>& parsedRequest) noexcept
@@ -69,7 +69,7 @@ auto RedisCommands::getResponse(const std::vector<std::string>& parsedRequest) n
             return std::tolower(c);
         });
         if (request == command.getName()) {
-            response = command.getResponse()(parsedRequest);
+            response = command.getCallback()(parsedRequest);
             break;
         }
     }
@@ -118,15 +118,13 @@ namespace ResponseCallbacks {
     }
 }
 
+// Instantiate const m_commands member variable.
 std::array<RedisCommand, 3> RedisCommands::m_commands = []() {
     const RedisCommand commandCmd{"command", -1, {"random", "loading", "stale"}, 0, 0, 0,
         {"@slow", "@connection"}, ResponseCallbacks::command};
     const RedisCommand echoCmd{
         "echo", 2, {"fast"}, 0, 0, 0, {"@fast", "@connection"}, ResponseCallbacks::echo};
-    // TODO: Unsure why clang-format puts all arguments below on one line instead of splitting.
-    // clang-format off
-    const RedisCommand pingCmd{"ping", -1, {"stale", "fast"}, 0, 0, 0,
-        {"@fast", "@connection"}, ResponseCallbacks::ping};
-    // clang-format on
+    const RedisCommand pingCmd{
+        "ping", -1, {"stale", "fast"}, 0, 0, 0, {"@fast", "@connection"}, ResponseCallbacks::ping};
     return std::array{commandCmd, echoCmd, pingCmd};
 }();

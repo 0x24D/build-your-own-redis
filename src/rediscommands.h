@@ -10,10 +10,10 @@ public:
     [[nodiscard]] RedisCommand(std::string name, int arity, std::vector<std::string> flags,
         unsigned int firstKeyPosition, int lastKeyPosition, unsigned int stepCount,
         std::vector<std::string> tags,
-        std::function<std::string(const std::vector<std::string>&)> response);
+        std::function<std::string(const std::vector<std::string>&)> callback);
     [[nodiscard]] auto toString() const noexcept;
     [[nodiscard]] auto getName() const noexcept;
-    [[nodiscard]] auto getResponse() const noexcept;
+    [[nodiscard]] auto getCallback() const noexcept;
 private:
     std::string m_name;
     int m_arity;
@@ -22,7 +22,7 @@ private:
     int m_lastKeyPosition;
     unsigned int m_stepCount;
     std::vector<std::string> m_tags;
-    std::function<std::string(const std::vector<std::string>&)> m_response;
+    std::function<std::string(const std::vector<std::string>&)> m_callback;
 };
 
 class RedisCommands {
