@@ -14,7 +14,7 @@ public:
     TestClient &operator=(const TestClient &) = delete;
     TestClient &operator=(TestClient &&) = delete;
     void send(const std::string &cmd) noexcept;
-    [[maybe_unused]] auto recv() noexcept -> std::string;
+    [[nodiscard]] auto recv() noexcept -> std::string;
 private:
     boost::asio::io_context m_ctx;
     tcp::resolver m_resolver;
