@@ -15,12 +15,29 @@ void testCommand() {
 void testConcurrentClients() {
     TestClient client1{};
     TestClient client2{};
+    TestClient client3{};
 
     client1.send("$4\r\nping\r\n");
-    client1.recv();
+    client2.send("*2\r\n$4\r\nping\r\n$5\r\nHello\r\n");
+    client3.send("*2\r\n$4\r\nping\r\n$5\r\nWorld\r\n");
 
-    client2.send("$4\r\nping\r\n");
-    client2.recv();
+    // Get response in order sent
+    TestHelper::equals(std::string{"Client 1 -> ping"}, client1.recv(), std::string{"+PONG\r\n"});
+    TestHelper::equals(
+        std::string{"Client 2 -> ping Hello"}, client2.recv(), std::string{"$5\r\nHello\r\n"});
+    TestHelper::equals(
+        std::string{"Client 3 -> ping World"}, client3.recv(), std::string{"$5\r\nWorld\r\n"});
+
+    client1.send("$4\r\nping\r\n");
+    client2.send("*2\r\n$4\r\nping\r\n$5\r\nHello\r\n");
+    client3.send("*2\r\n$4\r\nping\r\n$5\r\nWorld\r\n");
+
+    // Get response out of order
+    TestHelper::equals(
+        std::string{"Client 2 -> ping Hello"}, client2.recv(), std::string{"$5\r\nHello\r\n"});
+    TestHelper::equals(std::string{"Client 1 -> ping"}, client1.recv(), std::string{"+PONG\r\n"});
+    TestHelper::equals(
+        std::string{"Client 3 -> ping World"}, client3.recv(), std::string{"$5\r\nWorld\r\n"});
 }
 
 void testPing() {
