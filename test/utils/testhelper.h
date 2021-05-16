@@ -2,8 +2,7 @@
 namespace TestHelper {
     unsigned int testsRan = 0;
     unsigned int testsFailed = 0;
-    static void equals(
-        const std::string& label, const auto& response, const auto& expectedResponse) {
+    static void equals(std::string_view label, const auto& response, const auto& expectedResponse) {
         if (response != expectedResponse) {
             const auto printLambda = [](const auto& v) {
                 std::cerr << v << " ";
@@ -18,7 +17,7 @@ namespace TestHelper {
         ++testsRan;
     }
     static void startsWith(
-        const std::string& label, const auto& response, const auto& expectedStart) {
+        std::string_view label, const auto& response, const auto& expectedStart) {
         if (!response.starts_with(expectedStart)) {
             const auto printLambda = [](const auto& v) {
                 std::cerr << v << " ";
@@ -32,7 +31,7 @@ namespace TestHelper {
         }
         ++testsRan;
     }
-    static auto result(const std::string& label) {
+    static auto result(std::string_view label) {
         if (testsFailed == 0) {
             std::cout << label << ": all test cases passed\n";
             return 0;
