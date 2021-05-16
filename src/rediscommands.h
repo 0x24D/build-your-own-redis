@@ -31,7 +31,7 @@ public:
         -> std::string;
     [[nodiscard]] static auto toString() noexcept;
 private:
-    static std::array<RedisCommand, 2> m_commands;
+    static std::array<RedisCommand, 3> m_commands;
 };
 
 #endif

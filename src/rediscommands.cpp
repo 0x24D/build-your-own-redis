@@ -86,30 +86,47 @@ auto RedisCommands::toString() noexcept {
     return str;
 }
 
-std::array<RedisCommand, 2> RedisCommands::m_commands = []() {
-    const auto commandCmdResponse = [](const std::vector<std::string>&) {
-        return RedisCommands::toString();
-    };  // TODO: Handle COMMAND with additional args.
-    const auto pingCmdResponse = [](const std::vector<std::string>& parsedRequest) {
-        std::string str;
-        if (parsedRequest.size() == 1) {
-            str = "+PONG\r\n";
-        } else {
-            str = '$';
-            str += std::to_string(parsedRequest[1].size());
-            str += "\r\n";
-            str += parsedRequest[1];
-            str += "\r\n";
-        }
+// Free functions
+namespace {
+    auto getArgumentAsBulkString(const std::vector<std::string>& parsedRequest) {
+        std::string str = "$";
+        str += std::to_string(parsedRequest[1].size());
+        str += "\r\n";
+        str += parsedRequest[1];
+        str += "\r\n";
         return str;
-    };
+    }
+}
 
+// Command response callbacks
+namespace ResponseCallbacks {
+    // TODO: Handle COMMAND with additional args.
+    auto command(const std::vector<std::string>&) {
+        return RedisCommands::toString();
+    }
+
+    auto echo(const std::vector<std::string>& parsedRequest) {
+        return getArgumentAsBulkString(parsedRequest);
+    }
+
+    auto ping(const std::vector<std::string>& parsedRequest) {
+        if (parsedRequest.size() == 1) {
+            return std::string{"+PONG\r\n"};
+        } else {
+            return getArgumentAsBulkString(parsedRequest);
+        }
+    }
+}
+
+std::array<RedisCommand, 3> RedisCommands::m_commands = []() {
     const RedisCommand commandCmd{"command", -1, {"random", "loading", "stale"}, 0, 0, 0,
-        {"@slow", "@connection"}, commandCmdResponse};
+        {"@slow", "@connection"}, ResponseCallbacks::command};
+    const RedisCommand echoCmd{
+        "echo", 2, {"fast"}, 0, 0, 0, {"@fast", "@connection"}, ResponseCallbacks::echo};
     // TODO: Unsure why clang-format puts all arguments below on one line instead of splitting.
     // clang-format off
     const RedisCommand pingCmd{"ping", -1, {"stale", "fast"}, 0, 0, 0,
-        {"@fast", "@connection"}, pingCmdResponse};
+        {"@fast", "@connection"}, ResponseCallbacks::ping};
     // clang-format on
-    return std::array{commandCmd, pingCmd};
+    return std::array{commandCmd, echoCmd, pingCmd};
 }();
