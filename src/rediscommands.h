@@ -29,6 +29,7 @@ class RedisCommands {
 public:
     [[nodiscard]] static auto getResponse(const std::vector<std::string>& parsedRequest) noexcept
         -> std::string;
+    [[nodiscard]] constexpr static auto size() noexcept;
     [[nodiscard]] static auto toString() noexcept;
 private:
     static std::array<RedisCommand, 3> m_commands;

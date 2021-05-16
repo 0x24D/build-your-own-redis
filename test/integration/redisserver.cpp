@@ -5,11 +5,19 @@
 void testCommand() {
     TestClient client{};
 
+    // Command details
     client.send("$7\r\ncommand\r\n");
     TestHelper::startsWith("command", client.recv(), std::string_view{"*3\r\n*7\r\n"});
 
     client.send("$7\r\nCOMMAND\r\n");
     TestHelper::startsWith("COMMAND", client.recv(), std::string_view{"*3\r\n*7\r\n"});
+
+    // Number of commands
+    client.send("*2\r\n$7\r\ncommand\r\n$5\r\ncount\r\n");
+    TestHelper::equals("command count", client.recv(), std::string_view{":3\r\n"});
+
+    client.send("*2\r\n$7\r\nCOMMAND\r\n$5\r\nCOUNT\r\n");
+    TestHelper::equals("COMMAND COUNT", client.recv(), std::string_view{":3\r\n"});
 }
 
 void testConcurrentClients() {

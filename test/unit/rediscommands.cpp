@@ -2,11 +2,19 @@
 #include "../utils/testhelper.h"
 
 void testCommand() {
+    // Command details
     TestHelper::startsWith(
         "command", RedisCommands::getResponse({"command"}), std::string_view{"*3\r\n*7\r\n"});
 
     TestHelper::startsWith(
         "COMMAND", RedisCommands::getResponse({"COMMAND"}), std::string_view{"*3\r\n*7\r\n"});
+
+    // Number of commands
+    TestHelper::equals("command count", RedisCommands::getResponse({"command", "count"}),
+        std::string_view{":3\r\n"});
+
+    TestHelper::equals("COMMAND COUNT", RedisCommands::getResponse({"COMMAND", "COUNT"}),
+        std::string_view{":3\r\n"});
 }
 
 void testEcho() {

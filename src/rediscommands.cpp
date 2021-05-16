@@ -60,20 +60,39 @@ auto RedisCommand::getCallback() const noexcept {
     return m_callback;
 }
 
+// Free functions
+namespace {
+    auto toLower(std::string_view view) {
+        std::string str;
+        std::ranges::transform(view, std::back_inserter(str), [](auto c) {
+            return std::tolower(c);
+        });
+        return str;
+    }
+    auto getArgumentAsBulkString(const std::vector<std::string>& parsedRequest) {
+        std::string str{'$'};
+        str += std::to_string(parsedRequest[1].size());
+        str += "\r\n";
+        str += parsedRequest[1];
+        str += "\r\n";
+        return str;
+    }
+}
+
 auto RedisCommands::getResponse(const std::vector<std::string>& parsedRequest) noexcept
     -> std::string {
     std::string response;
     for (const auto& command : m_commands) {
-        std::string request;
-        std::ranges::transform(parsedRequest[0], std::back_inserter(request), [](unsigned char c) {
-            return std::tolower(c);
-        });
-        if (request == command.getName()) {
+        if (toLower(parsedRequest[0]) == command.getName()) {
             response = command.getCallback()(parsedRequest);
             break;
         }
     }
     return response;
+}
+
+constexpr auto RedisCommands::size() noexcept {
+    return m_commands.size();
 }
 
 auto RedisCommands::toString() noexcept {
@@ -86,23 +105,22 @@ auto RedisCommands::toString() noexcept {
     return str;
 }
 
-// Free functions
-namespace {
-    auto getArgumentAsBulkString(const std::vector<std::string>& parsedRequest) {
-        std::string str = "$";
-        str += std::to_string(parsedRequest[1].size());
-        str += "\r\n";
-        str += parsedRequest[1];
-        str += "\r\n";
-        return str;
-    }
-}
-
 // Command response callbacks
 namespace ResponseCallbacks {
     // TODO: Handle COMMAND with additional args.
-    auto command(const std::vector<std::string>&) {
-        return RedisCommands::toString();
+    auto command(const std::vector<std::string>& parsedRequest) {
+        if (parsedRequest.size() == 1) {
+            return RedisCommands::toString();
+        } else {
+            if (toLower(parsedRequest[1]) == "count") {
+                std::string str{':'};
+                str += std::to_string(RedisCommands::size());
+                str += "\r\n";
+                return str;
+            }
+            // TODO: error handling for invalid argument
+            return std::string{};
+        }
     }
 
     auto echo(const std::vector<std::string>& parsedRequest) {
