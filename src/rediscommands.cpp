@@ -58,6 +58,10 @@ auto RedisCommand::getName() const noexcept {
     return m_name;
 }
 
+auto RedisCommand::getArity() const noexcept {
+    return m_arity;
+}
+
 auto RedisCommand::getCallback() const noexcept {
     return m_callback;
 }
@@ -90,14 +94,16 @@ auto RedisCommands::getCommand(std::string_view str) noexcept {
 
 auto RedisCommands::getResponse(const std::vector<std::string>& parsedRequest) noexcept
     -> std::string {
-    std::string response;
-    for (const auto& command : m_commands) {
-        if (toLower(parsedRequest[0]) == command.getName()) {
-            response = command.getCallback()(parsedRequest);
-            break;
-        }
+    const auto [validRequest, errorMessage] = validateRequest(parsedRequest);
+    if (validRequest) {
+        // TODO: Return response from validateRequest?
+        //  We currently have to getCommand twice if the request is valid.
+        const auto command = RedisCommands::getCommand(parsedRequest[0]).value();
+        std::string response = command.getCallback()(parsedRequest);
+        return response;
+    } else {
+        return errorMessage;
     }
-    return response;
 }
 
 constexpr auto RedisCommands::size() noexcept {
@@ -114,9 +120,32 @@ auto RedisCommands::toString() noexcept {
     return str;
 }
 
+auto RedisCommands::validateRequest(const std::vector<std::string>& parsedRequest)
+    -> std::pair<bool, std::string> {
+    // TODO: Currently assuming parsedRequest isn't empty, can it be?
+    const auto optional = RedisCommands::getCommand(parsedRequest[0]);
+    if (!optional.has_value()) {
+        return {false, "-ERR unknown command '" + parsedRequest[0] + "'\r\n"};
+    }
+    const auto& command = optional.value();
+
+    // Check number of arguments
+    const auto arity = command.getArity();
+    const auto numberOfArguments = parsedRequest.size();
+    // Eithet too many arguments provided, or
+    if ((arity >= 0 && static_cast<std::size_t>(arity) < numberOfArguments) ||
+        // not enough arguments provided
+        static_cast<std::size_t>(std::abs(arity)) > numberOfArguments) {
+        return {false, "-ERR wrong number of arguments for '" + std::string{command.getName()} +
+                           "' command\r\n"};
+    }
+
+    return {true, ""};
+}
+
 // Command response callbacks
 namespace ResponseCallbacks {
-    // TODO: Handle COMMAND with additional args.
+    // TODO: Handle COMMAND GETKEYS.
     auto command(const std::vector<std::string>& parsedRequest) {
         if (parsedRequest.size() == 1) {
             return RedisCommands::toString();
@@ -138,8 +167,9 @@ namespace ResponseCallbacks {
                 }
                 return str;
             }
-            // TODO: error handling for invalid argument
-            return std::string{};
+
+            return "-ERR Unknown subcommand or wrong number of arguments for '" + parsedRequest[1] +
+                   "'\r\n";
         }
     }
 
@@ -148,11 +178,17 @@ namespace ResponseCallbacks {
     }
 
     auto ping(const std::vector<std::string>& parsedRequest) {
-        if (parsedRequest.size() == 1) {
-            return std::string{"+PONG\r\n"};
-        } else {
-            return getArgumentAsBulkString(parsedRequest);
+        // TODO: In theory this error handling should be in validateRequest, but the command
+        // properties for ping can't be used in a way to generically check for too many arguments -
+        // e.g. arity (from Redis docs) is -1 so it can have 1 or more arguments (including 'ping'
+        // key), but in reality either 1 or 2 arguments are required, more than 2 is an error.
+        switch (parsedRequest.size()) {
+            case 1:
+                return std::string{"+PONG\r\n"};
+            case 2:
+                return getArgumentAsBulkString(parsedRequest);
         }
+        return "-ERR wrong number of arguments for '" + toLower(parsedRequest[0]) + "' command\r\n";
     }
 }
 

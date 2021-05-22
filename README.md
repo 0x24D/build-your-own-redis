@@ -9,10 +9,10 @@ Implemented commands:
 |COMMAND|COUNT|:green_circle:||
 |COMMAND|GETKEYS|:red_circle:||
 |COMMAND|INFO [command-name...]|:green_circle:||
-|ECHO|message|:yellow_circle:|Need to handle error when wrong number of arguments provided|
+|ECHO|message|:green_circle:||
 |GET|key|:red_circle:||
 |PING||:green_circle:||
-|PING|message|:yellow_circle:|Need to handle error when wrong number of arguments provided|
+|PING|message|:green_circle:||
 |SET|key value|:red_circle:||
 
 Additional resources:

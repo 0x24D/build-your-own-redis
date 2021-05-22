@@ -38,29 +38,36 @@ void testCommand() {
     TestHelper::equals("COMMAND INFO", RedisCommands::getResponse({"COMMAND", "INFO"}),
         std::string_view{"*0\r\n"});
 
-    // Non-existing command
+    // Non-existent command
     TestHelper::equals("command info foo", RedisCommands::getResponse({"command", "info", "foo"}),
         std::string_view{"*1\r\n*0\r\n"});
 
     TestHelper::equals("COMMAND INFO FOO", RedisCommands::getResponse({"COMMAND", "INFO", "FOO"}),
         std::string_view{"*1\r\n*0\r\n"});
+
+    // Non-existent subcommand
+    TestHelper::equals("command foo", RedisCommands::getResponse({"command", "foo"}),
+        std::string_view{"-ERR Unknown subcommand or wrong number of arguments for 'foo'\r\n"});
+
+    TestHelper::equals("COMMAND FOO", RedisCommands::getResponse({"COMMAND", "FOO"}),
+        std::string_view{"-ERR Unknown subcommand or wrong number of arguments for 'FOO'\r\n"});
 }
 
 void testEcho() {
-    // TODO: Error handling
-    // TestHelper::equals("echo", RedisCommands::getResponse({"echo"}), std::string_view{"-ERR wrong
-    // number of arguments for 'echo' command\r\n"});
+    TestHelper::equals("echo", RedisCommands::getResponse({"echo"}),
+        std::string_view{"-ERR wrong number of arguments for 'echo' command\r\n"});
 
-    // TODO: Error handling
-    // TestHelper::equals("ECHO", RedisCommands::getResponse({"ECHO"}), std::string_view{"-ERR wrong
-    // number of arguments for 'echo' command\r\n"});
+    TestHelper::equals("ECHO", RedisCommands::getResponse({"ECHO"}),
+        std::string_view{"-ERR wrong number of arguments for 'echo' command\r\n"});
 
     TestHelper::equals("echo Hello", RedisCommands::getResponse({"echo", "Hello"}),
         std::string_view{"$5\r\nHello\r\n"});
 
-    // TODO: Error handling
-    // TestHelper::equals("echo Hello World", RedisCommands::getResponse({"echo", "Hello",
-    // "World"}), std::string_view{"-ERR wrong number of arguments for 'echo' command\r\n"});
+    TestHelper::equals("echo Hello World", RedisCommands::getResponse({"echo", "Hello", "World"}),
+        std::string_view{"-ERR wrong number of arguments for 'echo' command\r\n"});
+
+    TestHelper::equals("ECHO Hello World", RedisCommands::getResponse({"ECHO", "Hello", "World"}),
+        std::string_view{"-ERR wrong number of arguments for 'echo' command\r\n"});
 
     TestHelper::equals("echo Hello\\r\\nWorld",
         RedisCommands::getResponse({"echo", "Hello\\r\\nWorld"}),
@@ -82,9 +89,11 @@ void testPing() {
     TestHelper::equals("ping Hello", RedisCommands::getResponse({"ping", "Hello"}),
         std::string_view{"$5\r\nHello\r\n"});
 
-    // TODO: Error handling
-    // TestHelper::equals("ping Hello World", RedisCommands::getResponse({"ping", "Hello",
-    // "World"}), std::string_view{"-ERR wrong number of arguments for 'ping' command\r\n"});
+    TestHelper::equals("ping Hello World", RedisCommands::getResponse({"ping", "Hello", "World"}),
+        std::string_view{"-ERR wrong number of arguments for 'ping' command\r\n"});
+
+    TestHelper::equals("PING Hello World", RedisCommands::getResponse({"PING", "Hello", "World"}),
+        std::string_view{"-ERR wrong number of arguments for 'ping' command\r\n"});
 
     TestHelper::equals("ping Hello\\r\\nWorld",
         RedisCommands::getResponse({"ping", "Hello\\r\\nWorld"}),
@@ -98,10 +107,19 @@ void testPing() {
         std::string_view{"$12\r\nHello\r\nWorld\r\n"});
 }
 
+void testUnknown() {
+    TestHelper::equals("unknown", RedisCommands::getResponse({"unknown"}),
+        std::string_view{"-ERR unknown command 'unknown'\r\n"});
+
+    TestHelper::equals("UNKNOWN", RedisCommands::getResponse({"UNKNOWN"}),
+        std::string_view{"-ERR unknown command 'UNKNOWN'\r\n"});
+}
+
 int main() {
     testCommand();
     testEcho();
     testPing();
+    testUnknown();
 
     return TestHelper::result("unit/rediscommands");
 }

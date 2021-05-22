@@ -13,6 +13,7 @@ public:
         std::function<std::string(const std::vector<std::string>&)> callback);
     [[nodiscard]] auto toString() const noexcept;
     [[nodiscard]] auto getName() const noexcept;
+    [[nodiscard]] auto getArity() const noexcept;
     [[nodiscard]] auto getCallback() const noexcept;
 private:
     std::string_view m_name;
@@ -34,6 +35,8 @@ public:
     [[nodiscard]] static auto toString() noexcept;
 private:
     static std::array<RedisCommand, 3> m_commands;
+    static std::pair<bool, std::string> validateRequest(
+        const std::vector<std::string>& parsedRequest);
 };
 
 #endif
