@@ -3,11 +3,11 @@
 #include <optional>
 #include <utility>
 
-RedisCommand::RedisCommand(std::string name, int arity, std::vector<std::string> flags,
+RedisCommand::RedisCommand(std::string_view name, int arity, std::vector<std::string_view> flags,
     unsigned int firstKeyPosition, int lastKeyPosition, unsigned int stepCount,
-    std::vector<std::string> tags,
+    std::vector<std::string_view> tags,
     std::function<std::string(const std::vector<std::string>&)> callback)
-    : m_name(std::move(name)),
+    : m_name(name),
       m_arity(arity),
       m_flags(std::move(flags)),
       m_firstKeyPosition(firstKeyPosition),
