@@ -1,18 +1,20 @@
 #include "rediscommands.h"
 #include <algorithm>
+#include <optional>
+#include <utility>
 
 RedisCommand::RedisCommand(std::string name, int arity, std::vector<std::string> flags,
     unsigned int firstKeyPosition, int lastKeyPosition, unsigned int stepCount,
     std::vector<std::string> tags,
     std::function<std::string(const std::vector<std::string>&)> callback)
-    : m_name(name),
+    : m_name(std::move(name)),
       m_arity(arity),
-      m_flags(flags),
+      m_flags(std::move(flags)),
       m_firstKeyPosition(firstKeyPosition),
       m_lastKeyPosition(lastKeyPosition),
       m_stepCount(stepCount),
-      m_tags(tags),
-      m_callback(callback) {}
+      m_tags(std::move(tags)),
+      m_callback(std::move(callback)) {}
 
 auto RedisCommand::toString() const noexcept {
     std::string str{"*7\r\n"};

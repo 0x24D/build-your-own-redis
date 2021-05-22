@@ -16,7 +16,7 @@ void TestClient::send(const std::string& cmd) noexcept {
 }
 
 [[maybe_unused]] auto TestClient::recv() noexcept -> std::string {
-    std::array<unsigned char, 1024> recv;
+    std::array<unsigned char, 1024> recv{};
     boost::system::error_code ec;
     size_t bytesReceived;
     do {

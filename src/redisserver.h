@@ -9,10 +9,11 @@ using boost::asio::ip::tcp;
 
 class RedisServer {
 public:
-    [[nodiscard]] RedisServer(unsigned int port = 6379);
+    [[nodiscard]] explicit RedisServer(unsigned int port = 6379);
     void listen();
 private:
-    void handleAccept(std::shared_ptr<RedisClient> client, const boost::system::error_code& ec);
+    void handleAccept(
+        const std::shared_ptr<RedisClient>& client, const boost::system::error_code& ec);
     boost::asio::io_context m_ctx;
     tcp::acceptor m_acceptor;
 };

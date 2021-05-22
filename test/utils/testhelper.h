@@ -1,4 +1,5 @@
 #include <iostream>
+
 namespace TestHelper {
     unsigned int testsRan = 0;
     unsigned int testsFailed = 0;

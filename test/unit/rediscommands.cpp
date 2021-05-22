@@ -69,7 +69,7 @@ void testEcho() {
     TestHelper::equals("echo \"Hello World\"", RedisCommands::getResponse({"echo", "Hello World"}),
         std::string_view{"$11\r\nHello World\r\n"});
 
-    TestHelper::equals("echo \"Hello\\r\\nWorld\"",
+    TestHelper::equals(R"(echo "Hello\r\nWorld")",
         RedisCommands::getResponse({"echo", "Hello\r\nWorld"}),
         std::string_view{"$12\r\nHello\r\nWorld\r\n"});
 }
@@ -93,7 +93,7 @@ void testPing() {
     TestHelper::equals("ping \"Hello World\"", RedisCommands::getResponse({"ping", "Hello World"}),
         std::string_view{"$11\r\nHello World\r\n"});
 
-    TestHelper::equals("ping \"Hello\\r\\nWorld\"",
+    TestHelper::equals(R"(ping "Hello\r\nWorld")",
         RedisCommands::getResponse({"ping", "Hello\r\nWorld"}),
         std::string_view{"$12\r\nHello\r\nWorld\r\n"});
 }

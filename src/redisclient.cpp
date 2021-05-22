@@ -12,7 +12,7 @@ tcp::socket& RedisClient::getSocket() {
     return m_socket;
 }
 
-auto RedisClient::parseRequest(const RecvBuffer& recv) const {
+auto RedisClient::parseRequest(const RecvBuffer& recv) {
     const DataTypes t{recv[0]};
     switch (t) {
         case DataTypes::BulkString:

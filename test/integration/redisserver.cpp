@@ -108,7 +108,7 @@ void testEcho() {
 
     client.send("*2\r\n$4\r\nECHO\r\n$12\r\nHello\r\nWorld\r\n");
     TestHelper::equals(
-        "echo \"Hello\\r\\nWorld\"", client.recv(), std::string_view{"$12\r\nHello\r\nWorld\r\n"});
+        R"(echo "Hello\r\nWorld")", client.recv(), std::string_view{"$12\r\nHello\r\nWorld\r\n"});
 }
 
 void testPing() {
@@ -138,7 +138,7 @@ void testPing() {
 
     client.send("*2\r\n$4\r\nPING\r\n$12\r\nHello\r\nWorld\r\n");
     TestHelper::equals(
-        "ping \"Hello\\r\\nWorld\"", client.recv(), std::string_view{"$12\r\nHello\r\nWorld\r\n"});
+        R"(ping "Hello\r\nWorld")", client.recv(), std::string_view{"$12\r\nHello\r\nWorld\r\n"});
 }
 
 int main() {

@@ -11,7 +11,7 @@ void RedisServer::listen() {
 }
 
 void RedisServer::handleAccept(
-    std::shared_ptr<RedisClient> client, const boost::system::error_code& ec) {
+    const std::shared_ptr<RedisClient>& client, const boost::system::error_code& ec) {
     if (!ec)
         client->listen();
     listen();
