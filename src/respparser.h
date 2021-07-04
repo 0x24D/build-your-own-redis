@@ -21,14 +21,14 @@ enum struct DataTypes : CharType {
 class RESPParser {
 public:
     template <DataTypes T>
-    [[nodiscard]] static inline auto parseRequest(const RecvBuffer&) noexcept
+    [[nodiscard]] static inline auto parse_request(const RecvBuffer&) noexcept
         -> std::optional<std::vector<std::string>> {
         return {};
     }
 };
 
 template <>
-[[nodiscard]] inline auto RESPParser::parseRequest<DataTypes::BulkString>(
+[[nodiscard]] inline auto RESPParser::parse_request<DataTypes::BulkString>(
     const RecvBuffer& recv) noexcept -> std::optional<std::vector<std::string>> {
     auto it = std::ranges::find(recv, '\r');
     const std::string length{recv.cbegin() + 1, it};
@@ -38,22 +38,22 @@ template <>
 }
 
 template <>
-[[nodiscard]] inline auto RESPParser::parseRequest<DataTypes::Array>(
+[[nodiscard]] inline auto RESPParser::parse_request<DataTypes::Array>(
     const RecvBuffer& recv) noexcept -> std::optional<std::vector<std::string>> {
     std::vector<std::string> ret{};
-    const auto numElementsEnd = std::ranges::find(recv, '\r');
-    const std::string numElements{recv.begin() + 1, numElementsEnd};
-    auto stringStart = numElementsEnd + 2;
-    for (auto i = 0; i < std::stoi(numElements); ++i) {
-        const DataTypes t{*stringStart};
+    const auto num_elements_end = std::ranges::find(recv, '\r');
+    const std::string num_elements{recv.begin() + 1, num_elements_end};
+    auto string_start = num_elements_end + 2;
+    for (auto i = 0; i < std::stoi(num_elements); ++i) {
+        const DataTypes t{*string_start};
         if (t == DataTypes::BulkString) {
-            RecvBuffer bulkString{};
-            std::copy(stringStart, recv.end(), bulkString.begin());
-            const auto request = parseRequest<DataTypes::BulkString>(bulkString).value();
+            RecvBuffer bulk_string{};
+            std::copy(string_start, recv.end(), bulk_string.begin());
+            const auto request = parse_request<DataTypes::BulkString>(bulk_string).value();
             ret.insert(ret.end(), request.cbegin(), request.cend());
-            const auto returnSize = ret[i].size();
-            stringStart += (1 + std::to_string(returnSize).size() + 2 + returnSize +
-                            2);  // DataType, size of string length, \r\n, length of string, \r\n
+            const auto return_size = ret[i].size();
+            string_start += (1 + std::to_string(return_size).size() + 2 + return_size +
+                             2);  // DataType, size of string length, \r\n, length of string, \r\n
         }
     }
     return ret;

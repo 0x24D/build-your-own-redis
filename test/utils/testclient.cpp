@@ -18,11 +18,11 @@ void TestClient::send(const std::string& cmd) noexcept {
 [[maybe_unused]] auto TestClient::recv() noexcept -> std::string {
     std::array<unsigned char, 1024> recv{};
     boost::system::error_code ec;
-    size_t bytesReceived;
+    size_t bytes_received;
     do {
-        bytesReceived = m_socket.read_some(boost::asio::buffer(recv), ec);
-    } while (bytesReceived == 0);
+        bytes_received = m_socket.read_some(boost::asio::buffer(recv), ec);
+    } while (bytes_received == 0);
     std::string ret;
-    std::copy(recv.begin(), recv.begin() + bytesReceived, std::back_inserter(ret));
+    std::copy(recv.begin(), recv.begin() + bytes_received, std::back_inserter(ret));
     return ret;
 }

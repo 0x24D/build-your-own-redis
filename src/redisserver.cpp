@@ -5,12 +5,12 @@ RedisServer::RedisServer(unsigned int port) : m_acceptor(m_ctx, tcp::endpoint(tc
 
 void RedisServer::listen() {
     auto client = std::make_shared<RedisClient>(m_ctx);
-    m_acceptor.async_accept(client->getSocket(),
-        std::bind(&RedisServer::handleAccept, this, client, std::placeholders::_1));
+    m_acceptor.async_accept(client->get_socket(),
+        std::bind(&RedisServer::handle_accept, this, client, std::placeholders::_1));
     m_ctx.run();
 }
 
-void RedisServer::handleAccept(
+void RedisServer::handle_accept(
     const std::shared_ptr<RedisClient>& client, const boost::system::error_code& ec) {
     if (!ec)
         client->listen();

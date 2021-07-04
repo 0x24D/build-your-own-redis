@@ -2,15 +2,15 @@
 #include "../utils/testclient.h"
 #include "../utils/testhelper.h"
 
-void testCommand() {
+void test_command() {
     TestClient client{};
 
     // Command details
     client.send("$7\r\ncommand\r\n");
-    TestHelper::startsWith("command", client.recv(), std::string_view{"*3\r\n*7\r\n"});
+    TestHelper::starts_with("command", client.recv(), std::string_view{"*3\r\n*7\r\n"});
 
     client.send("$7\r\nCOMMAND\r\n");
-    TestHelper::startsWith("COMMAND", client.recv(), std::string_view{"*3\r\n*7\r\n"});
+    TestHelper::starts_with("COMMAND", client.recv(), std::string_view{"*3\r\n*7\r\n"});
 
     // Number of commands
     client.send("*2\r\n$7\r\ncommand\r\n$5\r\ncount\r\n");
@@ -21,17 +21,17 @@ void testCommand() {
 
     // Specific command details
     client.send("*3\r\n$7\r\ncommand\r\n$4\r\ninfo\r\n$4\r\nping\r\n");
-    TestHelper::startsWith("command info ping", client.recv(), std::string_view{"*1\r\n*7\r\n"});
+    TestHelper::starts_with("command info ping", client.recv(), std::string_view{"*1\r\n*7\r\n"});
 
     client.send("*3\r\n$7\r\nCOMMAND\r\n$4\r\nINFO\r\n$4\r\nPING\r\n");
-    TestHelper::startsWith("COMMAND INFO PING", client.recv(), std::string_view{"*1\r\n*7\r\n"});
+    TestHelper::starts_with("COMMAND INFO PING", client.recv(), std::string_view{"*1\r\n*7\r\n"});
 
     client.send("*4\r\n$7\r\ncommand\r\n$4\r\ninfo\r\n$4\r\necho\r\n$4\r\nping\r\n");
-    TestHelper::startsWith(
+    TestHelper::starts_with(
         "command info echo ping", client.recv(), std::string_view{"*2\r\n*7\r\n"});
 
     client.send("*4\r\n$7\r\nCOMMAND\r\n$4\r\nINFO\r\n$4\r\nECHO\r\n$4\r\nPING\r\n");
-    TestHelper::startsWith(
+    TestHelper::starts_with(
         "COMMAND INFO ECHO PING", client.recv(), std::string_view{"*2\r\n*7\r\n"});
 
     // No command
@@ -58,7 +58,7 @@ void testCommand() {
         std::string_view{"-ERR Unknown subcommand or wrong number of arguments for 'FOO'\r\n"});
 }
 
-void testConcurrentClients() {
+void test_concurrent_clients() {
     TestClient client1{};
     TestClient client2{};
     TestClient client3{};
@@ -86,7 +86,7 @@ void testConcurrentClients() {
         "Client 3 -> ping World", client3.recv(), std::string_view{"$5\r\nWorld\r\n"});
 }
 
-void testEcho() {
+void test_echo() {
     TestClient client{};
 
     client.send("$4\r\necho\r\n");
@@ -121,7 +121,7 @@ void testEcho() {
         R"(echo "Hello\r\nWorld")", client.recv(), std::string_view{"$12\r\nHello\r\nWorld\r\n"});
 }
 
-void testPing() {
+void test_ping() {
     TestClient client{};
 
     client.send("$4\r\nping\r\n");
@@ -154,7 +154,7 @@ void testPing() {
         R"(ping "Hello\r\nWorld")", client.recv(), std::string_view{"$12\r\nHello\r\nWorld\r\n"});
 }
 
-void testUnknown() {
+void test_unknown() {
     TestClient client{};
 
     client.send("$7\r\nunknown\r\n");
@@ -168,15 +168,15 @@ void testUnknown() {
 
 int main() {
     RedisServer server{};
-    std::thread serverThread(&RedisServer::listen, &server);
+    std::thread server_thread(&RedisServer::listen, &server);
 
-    testCommand();
-    testConcurrentClients();
-    testEcho();
-    testPing();
-    testUnknown();
+    test_command();
+    test_concurrent_clients();
+    test_echo();
+    test_ping();
+    test_unknown();
 
-    serverThread.detach();
+    server_thread.detach();
 
     return TestHelper::result("integration/redisserver");
 }
